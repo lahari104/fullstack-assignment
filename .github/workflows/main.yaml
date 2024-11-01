@@ -1,9 +1,11 @@
-name: CI/CD Pipeline for Soulpage Frontend and Backend Deployment
+---
+
+name: CI/CD Pipeline for Soulpage Frontend and Backend Deployment using Docker
 
 on:
   push:
     branches:
-      - main
+      - docker
 
 jobs:
   build-and-deploy:
@@ -13,55 +15,31 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        run: |
-          sudo apt update -y
-          curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-          sudo apt install -y nodejs
-          node --version
-          npm --version
-
-      - name: Install Frontend Dependencies
+      - name: Build Docker Image of Frontend and Push it to DockerHub
         run: |
           cd frontend
-          cp .env.local.example .env.local
-          npm install
-          npm run build
+          docker build -t ${{ github.repository }}-frontend:${{ github.run_number }} .
+          docker tag ${{ github.repository }}-frontend:${{ github.run_number }} lahari23/soulpage:${{ github.repository }}-frontend-${{ github.run_number }}
+          docker push lahari23/soulpage:${{ github.repository }}-frontend-${{ github.run_number }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.12.3'
-
-      - name: Install Python Dependencies
+      - name: Build Docker Image of Backend and Push it to DockerHub
         run: |
           cd backend
-          sudo apt update
-          sudo apt install -y python3 python3-pip python3-venv
-          sudo apt install -y pkg-config libmysqlclient-dev
-          python3 -m venv venv
-          source venv/bin/activate
-          pip3 install -r requirements.txt
-          pip3 install virtualenv
-          pip3 install django mysqlclient
-          pip3 install python-dotenv
-          cp .env.example .env
-          pip3 install python-decouple django-cors-headers djangorestframework django-nested-admin openai
-          python3 manage.py migrate
+          docker build -t ${{ github.repository }}-backend:${{ github.run_number }} .
+          docker tag ${{ github.repository }}-backend:${{ github.run_number }}
+          docker tag ${{ github.repository }}-backend:${{ github.run_number }} lahari23/soulpage:${{ github.repository }}-backend-${{ github.run_number }}
+          docker push lahari23/soulpage:${{ github.repository }}-backend-${{ github.run_number }}
 
-      - name: Deploy Frontend
-        run: |
-          sudo cp -r frontend/nextjs-app.service /etc/systemd/system/nextjs-app.service
-          sudo systemctl daemon-reload
-          sudo systemctl start nextjs-app.service
-          sudo systemctl enable nextjs-app.service
-          sudo systemctl restart nextjs-app.service
-          sudo systemctl status nextjs-app.service
+      - name: Deploy Frontend container
+        run: | 
+          docker run -d -P ${{ github.repository }}-frontend:${{ github.run_number }}
 
-      - name: Deploy Backend
-        run: |
-          sudo cp -r backend/django-app.service /etc/systemd/system/django-app.service
-          sudo systemctl daemon-reload
-          sudo systemctl start django-app.service
-          sudo systemctl enable django-app.service
-          sudo systemctl status django-app.service
+      - name: Deploy Backend container
+        run: | 
+          docker run -d -P ${{ github.repository }}-backend:${{ github.run_number }}
+
+      - name: Deploying the applications using doker compose
+        run:
+         docker compose up -d
+         docker image ls
+         docker ps -a
