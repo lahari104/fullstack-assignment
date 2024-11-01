@@ -37,6 +37,4 @@ jobs:
 
       - name: Deploying the applications using doker compose
         run:
-         docker compose up -d
-         docker image ls
-         docker container ls -a
+         docker compose up -d && docker image ls && docker container ls -a
