@@ -18,22 +18,22 @@ jobs:
       - name: Build Docker Image of Frontend and Push it to DockerHub
         run: |
           cd frontend
-          docker build -t lahari23/soulpage:${{ github.repository }}-frontend-${{ github.run_number }} .
-          docker push lahari23/soulpage:${{ github.repository }}-frontend-${{ github.run_number }}
+          docker build -t lahari23/soulpage:frontend-${{ github.run_number }} .
+          docker push lahari23/soulpage:frontend-${{ github.run_number }}
 
       - name: Build Docker Image of Backend and Push it to DockerHub
         run: |
           cd backend
-          docker build -t lahari23/soulpage:${{ github.repository }}-backend-${{ github.run_number }} .
-          docker push lahari23/soulpage:${{ github.repository }}-backend-${{ github.run_number }}
+          docker build -t lahari23/soulpage:backend-${{ github.run_number }} .
+          docker push lahari23/soulpage:backend-${{ github.run_number }}
 
       - name: Deploy Frontend container
         run: | 
-          docker run -d -P lahari23/soulpage:${{ github.repository }}-frontend-${{ github.run_number }}
+          docker run -d -P lahari23/soulpage:frontend-${{ github.run_number }}
 
       - name: Deploy Backend container
         run: | 
-          docker run -d -P lahari23/soulpage:${{ github.repository }}-backend-${{ github.run_number }}
+          docker run -d -P lahari23/soulpage:backend-${{ github.run_number }}
 
       - name: Deploying the applications using doker compose
         run:
