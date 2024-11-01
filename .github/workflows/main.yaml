@@ -26,7 +26,6 @@ jobs:
         run: |
           cd backend
           docker build -t ${{ github.repository }}-backend:${{ github.run_number }} .
-          docker tag ${{ github.repository }}-backend:${{ github.run_number }}
           docker tag ${{ github.repository }}-backend:${{ github.run_number }} lahari23/soulpage:${{ github.repository }}-backend-${{ github.run_number }}
           docker push lahari23/soulpage:${{ github.repository }}-backend-${{ github.run_number }}
 
