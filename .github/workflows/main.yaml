@@ -29,8 +29,8 @@ jobs:
 
       - name: Deploy Frontend container
         run: |
-          docker image rm $(docker image ls -q)
           docker container rm -f $(docker container ls -a -q)
+          docker image rm $(docker image ls -q)
           docker run -d -P lahari23/soulpage:frontend-${{ github.run_number }}
 
       - name: Deploy Backend container
