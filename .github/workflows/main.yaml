@@ -1,0 +1,67 @@
+name: CI/CD Pipeline for Soulpage Frontend and Backend Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: soulpage
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        run: |
+          sudo apt update -y
+          curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+          sudo apt install -y nodejs
+          node --version
+          npm --version
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          cp .env.local.example .env.local
+          npm install
+          npm run build
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12.3'
+
+      - name: Install Python Dependencies
+        run: |
+          cd backend
+          sudo apt update
+          sudo apt install -y python3 python3-pip python3-venv
+          sudo apt install -y pkg-config libmysqlclient-dev
+          python3 -m venv venv
+          source venv/bin/activate
+          pip3 install -r requirements.txt
+          pip3 install virtualenv
+          pip3 install django mysqlclient
+          pip3 install python-dotenv
+          cp .env.example .env
+          pip3 install python-decouple django-cors-headers djangorestframework django-nested-admin openai
+          python3 manage.py migrate
+
+      - name: Deploy Frontend
+        run: |
+          sudo cp -r frontend/nextjs-app.service /etc/systemd/system/nextjs-app.service
+          sudo systemctl daemon-reload
+          sudo systemctl start nextjs-app.service
+          sudo systemctl enable nextjs-app.service
+          sudo systemctl restart nextjs-app.service
+          sudo systemctl status nextjs-app.service
+
+      - name: Deploy Backend
+        run: |
+          sudo cp -r backend/django-app.service /etc/systemd/system/django-app.service
+          sudo systemctl daemon-reload
+          sudo systemctl start django-app.service
+          sudo systemctl enable django-app.service
+          sudo systemctl status django-app.service
