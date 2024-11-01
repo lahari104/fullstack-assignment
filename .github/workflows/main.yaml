@@ -39,4 +39,4 @@ jobs:
         run:
          docker compose up -d
          docker image ls
-         docker ps -a
+         docker container ls -a
