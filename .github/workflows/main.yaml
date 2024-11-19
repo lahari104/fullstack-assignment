@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - soulpage
 
 jobs:
   build-and-deploy:
@@ -19,21 +20,21 @@ jobs:
           curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
           sudo apt install -y nodejs
           node --version
-          npm --version
+          npm --version # npm - node package manager
 
-      - name: Install Frontend Dependencies
+      - name: Install Frontend Dependencies and build the Node js code
         run: |
           cd frontend
           cp .env.local.example .env.local
-          npm install
-          npm run build
+          npm install  # Installing node dependencies
+          npm run build # Builds the code
 
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.12.3'
 
-      - name: Install Python Dependencies
+      - name: Install Python Dependencies and building the python code and migrating the python file
         run: |
           cd backend
           sudo apt update
